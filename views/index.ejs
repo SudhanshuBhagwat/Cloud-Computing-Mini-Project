@@ -1,0 +1,88 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="jquery.min.js"></script>
+    <title>
+        Mini Project
+    </title>
+</head>
+
+<body>
+    <div class="container">
+        <nav class="navbar navbar-light">
+            <a class="navbar-brand"><h2>Navbar</h2></a>
+            <form class="form-inline" action="/delete" method="GET">
+                <!-- <% if(!this.loggedIn) { %>
+                <input class="form-control mr-sm-2 mt-3" type="text" name="ip" placeholder="IP Address"
+                    aria-label="Search">
+                <input class="form-control mr-sm-2 mt-3" type="text" name="pass" placeholder="Password"
+                    aria-label="Search">
+                <% } %> -->
+                <button class="btn btn-danger mt-3" type="submit">DELETE ALL</button>
+            </form>
+        </nav>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <input type="file" name="file" class="custom-file-input" id="file">
+                    <label class="custom-file-label" for="inputGroupFile02" aria-describedby="inputGroupFileAddon02"
+                        id="file-name">Choose file</label>
+                </div>
+                <div class="input-group-append">
+                    <input type="submit" class="input-group-text" id="inputGroupFileAddon02"></input>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <h2>Currently in Uploads</h1>
+            <ul class="list-group">
+                <% results.forEach( element => { %>
+                <li class="list-group-item d-flex justify-content-between align-items-center downloads"
+                    id="<%= element._ID %>"><%= element.name %>
+                    <button type="button" class="btn btn-primary">DOWNLOAD</button>
+                </li>
+                <% }); %>
+            </ul>
+    </div>
+    <script>
+        let inputFile = document.getElementById('file');
+        inputFile.addEventListener('change', e => {
+            document.getElementById('file-name').innerHTML = e.target.files[0].name;
+        });
+
+        let button = document.getElementsByClassName('downloads');
+        for (let i = 0; i < button.length; ++i) {
+            button[i].addEventListener('click', clickF);
+        }
+
+        function clickF() {
+            let fileName = '';
+            fetch('/download', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id: this.id
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(res => {
+                    fileName = res.headers.get('Content-Dispositon').split('attachment, filename=')[1];
+                    return res.blob()
+                })
+                .then(blob => {
+                    let url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(err => console.log(err));
+        }
+    </script>
+</body>
+
+</html>
